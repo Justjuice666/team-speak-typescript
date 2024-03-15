@@ -1,0 +1,1 @@
+process.stdin.write('1111')

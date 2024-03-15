@@ -1,0 +1,25 @@
+{
+  "users": [
+    {
+      "userName": "kk",
+      "password": "1",
+      "online": false,
+      "roomName": "",
+      "root": true
+    },
+    {
+      "userName": "jj",
+      "password": "2",
+      "online": true,
+      "roomName": "qwe",
+      "root": false
+    },
+    {
+      "userName": "qqq",
+      "password": "123",
+      "online": false,
+      "roomName": "",
+      "root": false
+    }
+  ]
+}
