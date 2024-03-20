@@ -1,24 +1,13 @@
-import * as readline from "readline";
 import { readFileSync } from "fs";
 import { MyTCPClient } from './client'
-import { Socket } from "net"
+import { commonCode } from "./commonCode";
 
-export function loading(){
-    let userName: string
-    let password: string
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-    rl.prompt()
-    rl.question('账号:\n', function(input){
-        userName = input
-        rl.question('密码:\n', function(input){
-            password = input
-            rl.close()
-        })
-    })
-    rl.on('close', () => {
+export function loading(client: MyTCPClient){
+    return new Promise(async (resolve)=>{
+        let userName = await client.getInput('账号:') as string
+        let password = await client.getInput('密码:') as string
+        
+
         // 读取 './users.json' 文件 并格式化为JSON对象
         let newUsers = JSON.parse(readFileSync('./users.json', 'utf-8'))
         // 判断用户名是否存在
@@ -44,24 +33,26 @@ export function loading(){
                 */
                 // 在线 挤掉 短连接
                 if (roomName !== '') {
-                    let s = new Socket()
-                    s.connect(8080)
-                    s.write('kill ' + userName + ' ' + roomName)
-                    // console.log('kill')
-                    s.end()
+                    MyTCPClient.twiceLoading(userName, roomName)
                 }
                 setTimeout(()=>{
-                    console.log('成功登录')
-                    const client = new MyTCPClient(userName, '大厅')
+                    console.log('\n成功登录')
+                    client.userInit(userName, '大厅')
                     client.connectPort()
+                    console.log('\nhelp (show commons)')
+                    resolve(commonCode.HallState)
                 }, 1000)
             } else {
-                console.log('---密码错误，重新输入---')
-                loading()
+                console.log('\n---密码错误---')
+                // 返回登录/注册/退出界面
+                // start()
+                resolve(commonCode.Start)
             }
         } else {
-            console.log('---不存在该用户名，重新输入---')
-            loading()
+            console.log('\n---不存在该用户名---')
+            // 返回登录/注册/退出界面
+            // start()
+            resolve(commonCode.Start)
         }
         // console.log('name', user.userName, 'password', user.password)
     })

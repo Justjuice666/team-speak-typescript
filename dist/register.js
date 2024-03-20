@@ -1,62 +1,47 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.register = void 0;
-const readline = require("readline");
+const commonCode_1 = require("./commonCode");
 const fs_1 = require("fs");
-function register() {
-    let user = {
-        userName: '',
-        password: '',
-        online: false,
-        roomName: '',
-        root: false
-    };
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-    let secondPassword = '';
-    rl.prompt();
-    rl.question('账号:\n', function (input) {
-        user.userName = input;
-        rl.question('密码:\n', function (input) {
-            user.password = input;
-            rl.question('确认密码:\n', function (input) {
-                secondPassword = input;
-                rl.close();
-            });
-        });
-    });
-    rl.on('close', () => {
-        // console.log('name', user.userName, 'password', user.password)
+function register(client) {
+    return new Promise(async (resolve) => {
+        let userName = await client.getInput('账号:');
+        let password = await client.getInput('密码:');
+        let secondPassword = await client.getInput('确认密码:');
         // 判断前后密码是否一致
-        if (user.password === secondPassword) {
+        if (password === secondPassword) {
             // 读取 './users.json' 文件 并格式化为JSON对象
             let newUsers = JSON.parse((0, fs_1.readFileSync)('./users.json', 'utf-8'));
             // 判断是否有重名
             let isNotSameName = true;
             for (const u of newUsers['users']) {
-                if (u.userName === user.userName) {
+                if (u.userName === userName) {
                     isNotSameName = false;
                     break;
                 }
             }
             if (isNotSameName) {
                 // 保存为 ./users.json 文件
+                let user = {
+                    userName: userName,
+                    password: password,
+                    online: false,
+                    roomName: '',
+                    root: false
+                };
                 newUsers['users'][newUsers.users.length] = user;
                 (0, fs_1.writeFileSync)('./users.json', JSON.stringify(newUsers, null, 2), 'utf-8');
-                console.log('注册成功');
-                // console.log(newUsers)
+                console.log('\n注册成功');
             }
             else {
-                console.log('---重名，重新输入---');
-                register();
+                console.log('\n---重名---');
             }
         }
         else {
-            console.log('---前后密码不一致，重新输入---');
-            register();
+            console.log('\n---前后密码不一致---');
         }
+        // 返回登录/注册/退出界面
+        resolve(commonCode_1.commonCode.Start);
     });
 }
 exports.register = register;
